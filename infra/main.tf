@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.0"
+      version = ">= 5.80, < 7.0"
     }
     random = {
       source  = "hashicorp/random"
@@ -26,6 +26,7 @@ provider "aws" {
 }
 
 data "aws_caller_identity" "current" {}
+
 data "aws_availability_zones" "available" {
   state = "available"
 }
