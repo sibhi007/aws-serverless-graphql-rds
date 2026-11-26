@@ -35,7 +35,17 @@ variable "db_username" {
 }
 
 variable "alert_email" {
-  description = "Email address for CloudWatch alarm notifications"
+  description = "Where CloudWatch alarms are emailed"
   type        = string
-  default     = "devops-alerts@example.com"
+}
+
+variable "github_repo" {
+  description = "owner/repo that may deploy, e.g. sibhi007/aws-serverless-graphql-rds"
+  type        = string
+}
+
+variable "image_tag" {
+  description = "Docker image tag the ECS task starts with"
+  type        = string
+  default     = "bootstrap"
 }
