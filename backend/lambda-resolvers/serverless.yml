@@ -1,0 +1,48 @@
+service: graphql-serverless-resolvers
+frameworkVersion: '3'
+
+plugins:
+  - serverless-esbuild
+
+custom:
+  esbuild:
+    bundle: true
+    minify: true
+    target: node20
+    exclude:
+      - '@aws-sdk/*'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  architecture: arm64
+  region: ${opt:region, 'ap-south-1'}
+  stage: ${opt:stage, 'prod'}
+  memorySize: 256
+  timeout: 15
+  logRetentionInDays: 14
+  vpc:
+    securityGroupIds:
+      - ${ssm:/graphql-serverless/${self:provider.stage}/lambda-sg-id}
+    subnetIds:
+      - ${ssm:/graphql-serverless/${self:provider.stage}/private-subnet-1}
+      - ${ssm:/graphql-serverless/${self:provider.stage}/private-subnet-2}
+  environment:
+    DB_SECRET_ARN: ${ssm:/graphql-serverless/${self:provider.stage}/db-secret-arn}
+    DB_HOST: ${ssm:/graphql-serverless/${self:provider.stage}/db-host}
+    DB_NAME: ${ssm:/graphql-serverless/${self:provider.stage}/db-name}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action: secretsmanager:GetSecretValue
+          Resource: ${ssm:/graphql-serverless/${self:provider.stage}/db-secret-arn}
+
+functions:
+  dbResolver:
+    handler: src/handlers/dbResolver.handler
+    reservedConcurrency: 10
+
+package:
+  patterns:
+    - certs/global-bundle.pem
